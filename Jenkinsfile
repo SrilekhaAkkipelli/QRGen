@@ -27,27 +27,29 @@ pipeline {
         }
 
         // Stage 3: Push Docker image to Docker Hub
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'qrgen-dockerhub',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    bat '''
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        if errorlevel 1 exit /b 1
+        
+stage('Push to Docker Hub') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'qrgen-dockerhub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )
+        ]) {
+            bat '''
+                powershell -NoProfile -NonInteractive -Command "$env:DOCKER_PASS | docker login -u $env:DOCKER_USER --password-stdin"
+                if errorlevel 1 exit /b 1
 
-                        docker push %IMAGE_NAME%:%IMAGE_TAG%
-                        if errorlevel 1 exit /b 1
+                docker push %IMAGE_NAME%:%IMAGE_TAG%
+                if errorlevel 1 exit /b 1
 
-                        docker logout
-                    '''
-                }
-            }
+                docker logout
+            '''
         }
+    }
+}
+
 
         // Stage 4: Deploy application to Kubernetes
         stage('Deploy to Kubernetes') {
