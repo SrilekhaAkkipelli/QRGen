@@ -5,16 +5,21 @@ pipeline {
     environment {
         IMAGE_NAME = "varsha072/qrgen"
         IMAGE_TAG = "latest"
+
+        // Use the Kubernetes configuration that works in CMD
+        KUBECONFIG = 'C:/Users/akkip/.kube/config'
     }
 
     stages {
 
+        // Stage 1: Checkout source code
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
+        // Stage 2: Verify Docker image
         stage('Verify Docker Image') {
             steps {
                 bat '''
@@ -24,6 +29,23 @@ pipeline {
             }
         }
 
+        // Stage 3: Check Kubernetes configuration
+        stage('Check Kubernetes Config') {
+            steps {
+                bat '''
+                    whoami
+                    echo USERPROFILE=%USERPROFILE%
+
+                    kubectl config current-context
+                    if errorlevel 1 exit /b 1
+
+                    kubectl config view --minify -o jsonpath="{.clusters[0].cluster.server}"
+                    echo.
+                '''
+            }
+        }
+
+        // Stage 4: Deploy application
         stage('Deploy to Kubernetes') {
             steps {
                 bat '''
@@ -39,6 +61,7 @@ pipeline {
             }
         }
 
+        // Stage 5: Verify deployment
         stage('Verify Deployment') {
             steps {
                 bat '''
