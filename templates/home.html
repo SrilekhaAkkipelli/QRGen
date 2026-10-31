@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+
+{% block title %}Home | QRGen{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to QRGen</h1>
+    <p>Generate QR codes quickly and easily.</p>
+    <p>Convert text, URLs and other information into QR codes.</p>
+    <a href="{{ url_for('generate') }}" class="btn">
+        Generate QR Code
+    </a>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <h3>Easy to Use</h3>
+        <p>Generate QR codes with just a few clicks.</p>
+    </div>
+
+    <div class="feature-card">
+        <h3>Fast Generation</h3>
+        <p>Create QR codes instantly.</p>
+    </div>
+
+    <div class="feature-card">
+        <h3>Download</h3>
+        <p>Download your QR code as a PNG image.</p>
+    </div>
+</section>
+{% endblock %}

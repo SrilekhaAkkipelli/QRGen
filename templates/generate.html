@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+
+{% block title %}Generate QR | QRGen{% endblock %}
+
+{% block content %}
+<section class="generator">
+    <h1>Generate Your QR Code</h1>
+    <p>Enter text or a website URL below.</p>
+
+    <form action="{{ url_for('generate') }}" method="POST">
+        <textarea name="text" placeholder="Enter text or URL here..."
+                  required>{{ entered_text }}</textarea>
+
+        <button type="submit" class="btn">
+            Generate QR Code
+        </button>
+    </form>
+
+    {% if qr_data %}
+    <div class="qr-result">
+        <h2>Your QR Code</h2>
+
+        <img src="data:image/png;base64,{{ qr_data }}"
+             alt="Generated QR Code">
+
+        <form action="{{ url_for('download') }}" method="POST">
+            <input type="hidden" name="text" value="{{ entered_text }}">
+            <button type="submit" class="btn">
+                Download QR Code
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

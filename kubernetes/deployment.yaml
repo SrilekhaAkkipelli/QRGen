@@ -1,0 +1,52 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: qrgen-deployment
+  labels:
+    app: qrgen
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: qrgen
+
+  template:
+    metadata:
+      labels:
+        app: qrgen
+
+    spec:
+      containers:
+        - name: qrgen
+          image: varsha072/qrgen:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 5055
+              protocol: TCP
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5055
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5055
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
