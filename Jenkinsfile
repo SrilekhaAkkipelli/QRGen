@@ -9,49 +9,21 @@ pipeline {
 
     stages {
 
-        // Stage 1: Checkout source code from GitHub
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        // Stage 2: Build Docker image
-        stage('Build Docker Image') {
+        stage('Verify Docker Image') {
             steps {
                 bat '''
-                    docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                    docker pull %IMAGE_NAME%:%IMAGE_TAG%
                     if errorlevel 1 exit /b 1
                 '''
             }
         }
 
-        // Stage 3: Push Docker image to Docker Hub
-        
-stage('Push to Docker Hub') {
-    steps {
-        withCredentials([
-            usernamePassword(
-                credentialsId: 'qrgen-dockerhub',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PASS'
-            )
-        ]) {
-            bat '''
-                powershell -NoProfile -NonInteractive -Command "$env:DOCKER_PASS | docker login -u $env:DOCKER_USER --password-stdin"
-                if errorlevel 1 exit /b 1
-
-                docker push %IMAGE_NAME%:%IMAGE_TAG%
-                if errorlevel 1 exit /b 1
-
-                docker logout
-            '''
-        }
-    }
-}
-
-
-        // Stage 4: Deploy application to Kubernetes
         stage('Deploy to Kubernetes') {
             steps {
                 bat '''
@@ -66,16 +38,24 @@ stage('Push to Docker Hub') {
                 '''
             }
         }
+
+        stage('Verify Deployment') {
+            steps {
+                bat '''
+                    kubectl get pods
+                    kubectl get services
+                '''
+            }
+        }
     }
 
-    // Post-build actions
     post {
         success {
-            echo 'QRGen CI/CD Pipeline completed successfully!'
+            echo 'QRGen Kubernetes deployment completed successfully!'
         }
 
         failure {
-            echo 'QRGen CI/CD Pipeline failed. Check the console output.'
+            echo 'QRGen deployment failed. Check the console output.'
         }
     }
 }
